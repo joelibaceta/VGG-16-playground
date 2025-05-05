@@ -110,11 +110,12 @@ test_loader = DataLoader(dataset=test_dataset, batch_size=64, shuffle=False)
 model = VGG16().to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=3)
 
 import time
 
 # Training the model
-num_epochs = 32
+num_epochs = 64
 total_start = time.time()  # Tiempo inicial del entrenamiento
 
 train_losses = []
@@ -159,6 +160,8 @@ for epoch in range(num_epochs):
             correct += (predicted == labels).sum().item()
     accuracy = 100 * correct / total
     test_accuracies.append(accuracy)
+
+    scheduler.step(accuracy)
 
     # Guardar el mejor modelo
     if accuracy > best_accuracy:
